@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:weather/colors.dart';
 import 'package:weather/models/forecast_weather_model/forecast_weather_model.dart';
+import 'package:weather/private.dart';
 import 'package:weather/services/api_calls.dart';
+import 'package:http/http.dart' as http;
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -19,7 +22,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    forecast = getForecastData(location: 'London');
+    forecast = getForecast(location: 'Paris');
   }
 
   @override
@@ -28,7 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           image: DecorationImage(
               image: AssetImage("assets/images/towerBridge.png"),
               fit: BoxFit.fill),
@@ -59,12 +62,12 @@ class _MyHomePageState extends State<MyHomePage> {
                         height: MediaQuery.sizeOf(context).height * 0.1,
                       ),
                       Container(
-                        padding: const EdgeInsets.only(left: 20, right: 20),
+                        padding: EdgeInsets.only(left: 20, right: 20),
                         width: MediaQuery.sizeOf(context).width,
                         // height: MediaQuery.sizeOf(context).height * 0.01,
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.location_on,
                               color: Colors.white,
                             ),
@@ -73,15 +76,15 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             Text(
                               snapshot.data?.location?.name ?? "No Data",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Roboto',
                                 fontSize: 18,
                                 color: Colors.white,
                                 // height: 16,
                               ),
                             ),
-                            const Spacer(),
-                            const Icon(
+                            Spacer(),
+                            Icon(
                               Icons.menu,
                               color: Colors.white,
                               size: 35,
@@ -98,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             monthInput:
                                 snapshot.data?.location?.localtime.toString() ??
                                     "No Data"),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Roboto',
                           fontSize: 40, fontWeight: FontWeight.w500,
                           color: Colors.white,
@@ -107,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       Text(
                         "Updated ${snapshot.data?.current?.lastUpdated}",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Roboto',
                           fontSize: 16, fontWeight: FontWeight.w500,
                           color: Colors.white,
@@ -125,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       Text(
                         snapshot.data!.current!.condition!.text ?? "No Data",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Roboto',
                           fontSize: 40, fontWeight: FontWeight.w700,
                           color: Colors.white,
@@ -167,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       // ),
                       Text(
                         "${snapshot.data!.current!.tempC.toString()}°C",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Roboto',
                           fontSize: 70, fontWeight: FontWeight.w700,
                           fontFeatures: [FontFeature.superscripts()],
@@ -175,6 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           // height: 16,
                         ),
                       ),
+                      Spacer(),
                       Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: Row(
@@ -185,7 +189,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 SvgPicture.asset(
                                   "assets/images/iconHumidity.svg",
                                 ),
-                                const Text(
+                                Text(
                                   "Humidity",
                                   style: TextStyle(
                                     fontFamily: 'Roboto',
@@ -196,7 +200,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                                 Text(
                                   "${snapshot.data!.current!.humidity.toString()}%",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontFamily: 'Roboto',
                                     fontSize: 14, fontWeight: FontWeight.w500,
                                     color: Colors.white,
@@ -210,7 +214,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 SvgPicture.asset(
                                   "assets/images/iconWind.svg",
                                 ),
-                                const Text(
+                                Text(
                                   "Wind",
                                   style: TextStyle(
                                     fontFamily: 'Roboto',
@@ -221,7 +225,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                                 Text(
                                   "${snapshot.data!.current!.windKph.toString()} km/h",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontFamily: 'Roboto',
                                     fontSize: 14, fontWeight: FontWeight.w500,
                                     color: Colors.white,
@@ -235,7 +239,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 SvgPicture.asset(
                                   "assets/images/iconFeelsLike.svg",
                                 ),
-                                const Text(
+                                Text(
                                   "Feels Like",
                                   style: TextStyle(
                                     fontFamily: 'Roboto',
@@ -246,7 +250,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 ),
                                 Text(
                                   "${snapshot.data!.current!.feelslikeC.toString()}°",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontFamily: 'Roboto',
                                     fontSize: 14, fontWeight: FontWeight.w500,
                                     color: Colors.white,
@@ -258,11 +262,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           ],
                         ),
                       ),
-                      const Spacer(),
+                      SizedBox(
+                        height: 20,
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(left: 24.0, right: 24.0),
                         child: Container(
-                          padding: const EdgeInsets.all(20),
+                          padding: EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             color: forecastBackground.withOpacity(0.7),
                             borderRadius: BorderRadius.circular(24),
@@ -276,7 +282,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     snapshot.data!.forecast!.forecastday![0]
                                             .date ??
                                         "",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Roboto',
                                       fontSize: 14, fontWeight: FontWeight.w700,
                                       // fontFeatures: [FontFeature.superscripts()],
@@ -292,7 +298,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ),
                                   Text(
                                     "${snapshot.data!.forecast!.forecastday![0].day!.avgtempC}°C",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Roboto',
                                       fontSize: 14, fontWeight: FontWeight.w700,
                                       // fontFeatures: [FontFeature.superscripts()],
@@ -302,7 +308,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ),
                                   Text(
                                     "${snapshot.data!.forecast!.forecastday![0].day!.maxwindKph}\nkm/h",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Roboto',
                                       fontSize: 14, fontWeight: FontWeight.w500,
                                       color: Colors.white,
@@ -317,7 +323,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     snapshot.data!.forecast!.forecastday![1]
                                             .date ??
                                         "",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Roboto',
                                       fontSize: 14, fontWeight: FontWeight.w700,
                                       // fontFeatures: [FontFeature.superscripts()],
@@ -333,7 +339,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ),
                                   Text(
                                     "${snapshot.data!.forecast!.forecastday![1].day!.avgtempC}°C",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Roboto',
                                       fontSize: 14, fontWeight: FontWeight.w700,
                                       // fontFeatures: [FontFeature.superscripts()],
@@ -343,7 +349,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ),
                                   Text(
                                     "${snapshot.data!.forecast!.forecastday![1].day!.maxwindKph}\nkm/h",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Roboto',
                                       fontSize: 14, fontWeight: FontWeight.w500,
                                       color: Colors.white,
@@ -358,7 +364,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     snapshot.data!.forecast!.forecastday![2]
                                             .date ??
                                         "",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Roboto',
                                       fontSize: 14, fontWeight: FontWeight.w700,
                                       // fontFeatures: [FontFeature.superscripts()],
@@ -374,7 +380,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ),
                                   Text(
                                     "${snapshot.data!.forecast!.forecastday![2].day!.avgtempC}°C",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Roboto',
                                       fontSize: 14, fontWeight: FontWeight.w700,
                                       // fontFeatures: [FontFeature.superscripts()],
@@ -384,7 +390,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   ),
                                   Text(
                                     "${snapshot.data!.forecast!.forecastday![2].day!.maxwindKph}\nkm/h",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'Roboto',
                                       fontSize: 14, fontWeight: FontWeight.w500,
                                       color: Colors.white,
@@ -438,13 +444,16 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                       ),
-                      const Spacer(),
+                      // Spacer(),
+                      SizedBox(
+                        height: 20,
+                      )
                     ],
                   );
                 }
               }
               {
-                return const Center(child: CircularProgressIndicator());
+                return Center(child: CircularProgressIndicator());
               }
             }),
       ),
@@ -484,7 +493,47 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  getDayFromString({required String dayInput}) {
-    // String day = dayInput.substring(8, 10);
+  // getForecast() async {
+  //   forecast = await getForecastData(location: 'Barcelona');
+  // }
+  Future<ForecastWeatherModel> getForecast({required String location}) async {
+    // try {
+    print('just in try ');
+    var url =
+        Uri.https(urlAddress, "/forecast.json", {'q': location, 'days': '3'});
+    var response = await http.get(url, headers: {
+      'X-RapidAPI-Key': apiKey,
+      'X-RapidAPI-Host': "weatherapi-com.p.rapidapi.com"
+    });
+    print('just after get request');
+
+    // var responseList = jsonDecode(response.body);
+    // print('just after decoding $responseList ');
+    // print('response List length ${responseList.length}');
+    late ForecastWeatherModel retVal;
+    // try {
+    //   print('just in try 2');
+    retVal = ForecastWeatherModel.fromJson(response.body);
+    // } catch (e) {
+    //   print("try 2 catch block error: $e");
+    //   throw e;
+    // }
+
+    print("ret vat: $retVal");
+    print(retVal.forecast!.forecastday!.length);
+    return retVal;
+    // } catch (e) {
+    // if (e.response != null) {
+    //   print('Dio error!');
+    //   print('STATUS: ${e.response?.statusCode}');
+    //   print('DATA: ${e.response?.data}');
+    //   print('HEADERS: ${e.response?.headers}');
+    // } else {
+    //   // Error due to setting up or sending the request
+    //   print('Error sending request!');
+    // print(e);
+    // }
+    // }
+    // return Future.value(ForecastWeatherModel());
   }
 }
