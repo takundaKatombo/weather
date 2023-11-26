@@ -80,7 +80,10 @@ class _SearchLocationsState extends State<SearchLocations> {
                       fontWeight: FontWeight.w400),
                 ),
                 Spacer(),
-                Image.asset("assets/images/searchIcon.png"),
+                IconButton(
+                  icon: Image.asset("assets/images/searchIcon.png"),
+                  onPressed: () {},
+                ),
               ],
             ),
             SizedBox(
