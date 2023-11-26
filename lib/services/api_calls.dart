@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:weather/models/forecast_weather_model/forecast.dart';
 import 'package:weather/models/forecast_weather_model/forecast_weather_model.dart';
 import 'package:weather/models/realtime_weather_model/realtime_weather_model.dart';
 import 'package:weather/private.dart';
@@ -35,7 +36,7 @@ Future<ForecastWeatherModel> getForecastData({required String location}) async {
   // try {
   print('just in try ');
   var url =
-      Uri.https(urlAddress, "/forecast.json", {'q': location, 'days': '5'});
+      Uri.https(urlAddress, "/forecast.json", {'q': location, 'days': '3'});
   var response = await http.get(url, headers: {
     'X-RapidAPI-Key': apiKey,
     'X-RapidAPI-Host': "weatherapi-com.p.rapidapi.com"
