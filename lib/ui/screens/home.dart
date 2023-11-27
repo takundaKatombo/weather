@@ -1,13 +1,8 @@
-import 'dart:convert';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:weather/colors.dart';
 import 'package:weather/models/forecast_weather_model/forecast_weather_model.dart';
-import 'package:weather/private.dart';
-import 'package:weather/services/api_calls.dart';
-import 'package:http/http.dart' as http;
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({super.key, required this.forecast});
@@ -18,6 +13,37 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String getLocationName() {
+    // Replace this with your logic to get the location name
+    return widget.forecast.location?.name ?? '';
+  }
+
+  String getBackgroundImage() {
+    // Replace this with your logic to determine the background image based on the location name
+    String locationName = getLocationName();
+    if (locationName == 'London') {
+      return 'assets/images/towerBridge.png';
+    } else if (locationName == 'Paris') {
+      return 'assets/images/parisEffiel.png';
+    } else if (locationName == 'Bangkok') {
+      return 'assets/images/bangkok.png';
+    } else if (locationName == 'Dubai') {
+      return 'assets/images/burjKhalifa.png';
+    } else if (locationName == 'Rome') {
+      return 'assets/images/colosseum.png';
+    } else if (locationName == 'Minsk') {
+      return 'assets/images/victoriaSquareMinsk.png';
+    } else if (locationName == 'Barcelona') {
+      return 'assets/images/sagradaFamilia.png';
+    } else if (locationName == 'Shanghai') {
+      return 'assets/images/greatWallChina.png';
+    } else if (locationName == 'New York') {
+      return 'assets/images/statueOfLiberty.png';
+    } else {
+      return 'assets/images/defaultBackground.png';
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -32,19 +58,13 @@ class _MyHomePageState extends State<MyHomePage> {
         height: double.infinity,
         decoration: BoxDecoration(
           image: DecorationImage(
-              image: AssetImage("assets/images/towerBridge.png"),
-              fit: BoxFit.fill),
+            image: AssetImage(getBackgroundImage()),
+            fit: BoxFit.fill,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          // mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            // Center(
-            //   child: const Text(
-            //     'You Dont have Saved Locations',
-            //     style: TextStyle(fontSize: 30, fontFamily: 'Poppins'),
-            //   ),
-            // ),
             //TODO: add a button to go to search page
             SizedBox(
               height: MediaQuery.sizeOf(context).height * 0.1,
@@ -52,7 +72,6 @@ class _MyHomePageState extends State<MyHomePage> {
             Container(
               padding: EdgeInsets.only(left: 20, right: 20),
               width: MediaQuery.sizeOf(context).width,
-              // height: MediaQuery.sizeOf(context).height * 0.01,
               child: Row(
                 children: [
                   Icon(
@@ -109,8 +128,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Image.network(
               "https:${widget.forecast.current!.condition!.icon}",
-              width: 100,
-              height: 100,
+              width: 150,
+              height: 150,
               fit: BoxFit.fill,
             ),
             Text(
@@ -348,47 +367,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         )
                       ],
                     ),
-                    // Column(
-                    //   children: [
-                    //     Text(
-                    //       snapshot.data!.forecast!.forecastday![3]
-                    //               .date ??
-                    //           "",
-                    //       style: TextStyle(
-                    //         fontFamily: 'Roboto',
-                    //         fontSize: 14, fontWeight: FontWeight.w700,
-                    //         // fontFeatures: [FontFeature.superscripts()],
-                    //         color: Colors.white,
-                    //         // height: 16,
-                    //       ),
-                    //     ),
-                    //     Image.network(
-                    //       "https:${snapshot.data!.forecast!.forecastday![3].day!.condition!.icon}",
-                    //       width: 50,
-                    //       height: 50,
-                    //       fit: BoxFit.fill,
-                    //     ),
-                    //     Text(
-                    //       "${snapshot.data!.forecast!.forecastday![3].day!.avgtempC}°C",
-                    //       style: TextStyle(
-                    //         fontFamily: 'Roboto',
-                    //         fontSize: 14, fontWeight: FontWeight.w700,
-                    //         // fontFeatures: [FontFeature.superscripts()],
-                    //         color: Colors.white,
-                    //         // height: 16,
-                    //       ),
-                    //     ),
-                    //     Text(
-                    //       "${snapshot.data!.forecast!.forecastday![3].day!.maxwindKph}\nkm/h",
-                    //       style: TextStyle(
-                    //         fontFamily: 'Roboto',
-                    //         fontSize: 14, fontWeight: FontWeight.w500,
-                    //         color: Colors.white,
-                    //         // height: 16,
-                    //       ),
-                    //     )
-                    //   ],
-                    // )
                   ],
                 ),
               ),

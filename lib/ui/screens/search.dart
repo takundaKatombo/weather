@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -38,24 +39,29 @@ class _SearchLocationsState extends State<SearchLocations> {
   }
 
   Future<List<ForecastWeatherModel>> getForecastForDefaultLocations() async {
-    print(
-        "getting forecast for default locations:\n default locations length: ${defaultLocations.length}");
     for (String location in defaultLocations) {
       // Call the function to get the forecast for each location
-      // You can replace this with your actual function call
       ForecastWeatherModel forecastData =
           await getForecastData(location: location);
       forecastList.add(forecastData);
     }
-    print("forecast list length: ${forecastList.length}");
-    print("forecast list : ${forecastList}");
+
     return forecastList;
+  }
+
+  Future<void> refresh() async {
+    try {
+      setState(() {
+        futureForecastList = getForecastForDefaultLocations();
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
 
   void saveLocation(String location) async {}
 
-  //get forecast for default locations
-
+  void deleteLocation(String location) async {}
   @override
   Widget build(BuildContext context) {
     //create a search page with search bar for locations to check weather for and save selected locations to shared preferences
@@ -64,45 +70,55 @@ class _SearchLocationsState extends State<SearchLocations> {
       body: Container(
         padding: EdgeInsets.only(left: 20, right: 20),
         decoration: BoxDecoration(gradient: purplrGradient),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 70,
-            ),
-            Row(
-              children: [
-                Text(
-                  "Saved Locations",
-                  style: TextStyle(
-                      fontFamily: 'Roboto',
-                      fontSize: 18,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w400),
-                ),
-                Spacer(),
-                IconButton(
-                  icon: Image.asset("assets/images/searchIcon.png"),
-                  onPressed: () {},
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 50,
-            ),
-            SizedBox(
-              height: MediaQuery.sizeOf(context).height * 0.6,
-              child: FutureBuilder(
-                future: futureForecastList,
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
+        child: RefreshIndicator(
+          onRefresh: refresh,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 70,
+              ),
+              Row(
+                children: [
+                  Text(
+                    "Saved Locations",
+                    style: TextStyle(
+                        fontFamily: 'Roboto',
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  Spacer(),
+                  IconButton(
+                    icon: Image.asset("assets/images/searchIcon.png"),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 50,
+              ),
+              SizedBox(
+                height: MediaQuery.sizeOf(context).height * 0.6,
+                child: FutureBuilder(
+                  future: futureForecastList,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
                       return Center(child: CircularProgressIndicator());
-                    case ConnectionState.done:
+                    } else if (snapshot.connectionState ==
+                        ConnectionState.done) {
                       if (snapshot.hasError) {
-                        return Text(
-                          "Error: ${snapshot.error}",
-                          style: TextStyle(color: Colors.red),
-                        );
+                        // Check for network error
+                        if (snapshot.error is SocketException) {
+                          return Text(
+                            "Network error. Please check your internet connection.",
+                            style: TextStyle(color: Colors.red),
+                          );
+                        } else {
+                          return Text(
+                            "Error: ${snapshot.error}",
+                            style: TextStyle(color: Colors.red),
+                          );
+                        }
                       } else if (snapshot.hasData) {
                         return SingleChildScrollView(
                           child: Column(
@@ -122,50 +138,47 @@ class _SearchLocationsState extends State<SearchLocations> {
                       } else {
                         return Text("Snapshot has no data. No Data");
                       }
-                    case ConnectionState.none:
+                    } else {
                       return Text("Something went wrong");
-                    case ConnectionState.active:
-                      return Text("No Data");
-                    default:
-                      return Text("Unknown connection state");
-                  }
-                },
+                    }
+                  },
+                ),
               ),
-            ),
-            // SavedLocationsCard(),
-            SizedBox(
-              height: 70,
-            ),
-            Container(
-              padding: EdgeInsets.all(20),
-              width: double.infinity,
-              height: MediaQuery.sizeOf(context).height * 0.08,
-              decoration: BoxDecoration(
-                color: forecastBackground.withOpacity(0.4),
-                borderRadius: BorderRadius.circular(20),
+              // SavedLocationsCard(),
+              SizedBox(
+                height: 70,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add_circle_outline_outlined,
-                    color: Colors.white,
-                  ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Text(
-                    "Add new ",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 24),
-                  )
-                ],
-              ),
-            )
-          ],
+              Container(
+                padding: EdgeInsets.all(20),
+                width: double.infinity,
+                height: MediaQuery.sizeOf(context).height * 0.08,
+                decoration: BoxDecoration(
+                  color: forecastBackground.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_circle_outline_outlined,
+                      color: Colors.white,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      "Add new ",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 24),
+                    )
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
