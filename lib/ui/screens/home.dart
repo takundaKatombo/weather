@@ -13,6 +13,37 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String getLocationName() {
+    // Replace this with your logic to get the location name
+    return widget.forecast.location?.name ?? '';
+  }
+
+  String getBackgroundImage() {
+    // Replace this with your logic to determine the background image based on the location name
+    String locationName = getLocationName();
+    if (locationName == 'London') {
+      return 'assets/images/towerBridge.png';
+    } else if (locationName == 'Paris') {
+      return 'assets/images/parisEffiel.png';
+    } else if (locationName == 'Bangkok') {
+      return 'assets/images/bangkok.png';
+    } else if (locationName == 'Dubai') {
+      return 'assets/images/burjKhalifa.png';
+    } else if (locationName == 'Rome') {
+      return 'assets/images/colosseum.png';
+    } else if (locationName == 'Minsk') {
+      return 'assets/images/victoriaSquareMinsk.png';
+    } else if (locationName == 'Barcelona') {
+      return 'assets/images/sagradaFamilia.png';
+    } else if (locationName == 'Shanghai') {
+      return 'assets/images/greatWallChina.png';
+    } else if (locationName == 'New York') {
+      return 'assets/images/statueOfLiberty.png';
+    } else {
+      return 'assets/images/defaultBackground.png';
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -27,8 +58,9 @@ class _MyHomePageState extends State<MyHomePage> {
         height: double.infinity,
         decoration: BoxDecoration(
           image: DecorationImage(
-              image: AssetImage("assets/images/towerBridge.png"),
-              fit: BoxFit.fill),
+            image: AssetImage(getBackgroundImage()),
+            fit: BoxFit.fill,
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -96,8 +128,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Image.network(
               "https:${widget.forecast.current!.condition!.icon}",
-              width: 100,
-              height: 100,
+              width: 150,
+              height: 150,
               fit: BoxFit.fill,
             ),
             Text(
